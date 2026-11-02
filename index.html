@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spec Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --sunk:#EDF0F5; --line:#D5DBE5; --ink:#18202C; --muted:#5A6475;
+  --blue:#2A4F86; --blue-soft:#E3EAF6;
+  --pass:#2C7A55; --pass-soft:#E2F2E9; --fail:#B03A33; --fail-soft:#F8E4E2; --warn:#9A6210; --warn-soft:#F6ECD9; --draft:#6B7484; --draft-soft:#E9ECF1;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121722; --surface:#1A2130; --sunk:#151B27; --line:#2E3849; --ink:#E7EBF2; --muted:#9AA4B5;
+    --blue:#8EB0E6; --blue-soft:#22314A;
+    --pass:#6FC79A; --pass-soft:#1C3329; --fail:#EF8A82; --fail-soft:#3A2224; --warn:#E3B062; --warn-soft:#3A2F1C; --draft:#A3ACBB; --draft-soft:#252D3B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1A2130; --sunk:#151B27; --line:#2E3849; --ink:#E7EBF2; --muted:#9AA4B5;
+  --blue:#8EB0E6; --blue-soft:#22314A;
+  --pass:#6FC79A; --pass-soft:#1C3329; --fail:#EF8A82; --fail-soft:#3A2224; --warn:#E3B062; --warn-soft:#3A2F1C; --draft:#A3ACBB; --draft-soft:#252D3B;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.55}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.app{display:grid;grid-template-columns:330px 1fr;min-height:100%}
+@media (max-width:900px){.app{grid-template-columns:1fr}}
+aside{background:var(--surface);border-right:1px solid var(--line);padding:22px 18px;display:flex;flex-direction:column;gap:18px}
+@media (max-width:900px){aside{border-right:0;border-bottom:1px solid var(--line)}}
+.brand h1{font-size:22px;margin:0;font-weight:600;letter-spacing:-0.01em}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.insights{background:var(--sunk);border-radius:10px;padding:14px}
+.insights h2{font-size:13px;margin:0 0 10px;color:var(--muted);font-weight:500}
+.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.counts div{background:var(--surface);border-radius:8px;padding:8px 6px;text-align:center}
+.counts b{display:block;font-size:20px;font-weight:600;line-height:1.1}
+.counts span{font-size:11.5px;color:var(--muted)}
+.avg{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;margin-bottom:10px}
+.avg b{font-size:18px;font-weight:600}
+.gaps{margin:0;padding:0;list-style:none;font-size:13px}
+.gaps li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-top:1px solid var(--line)}
+.gaps li span:last-child{color:var(--fail);white-space:nowrap}
+.listtools{display:flex;gap:8px}
+.listtools button{white-space:nowrap}
+.listtools select{flex:1;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:500;font-size:14px}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0F1520}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0F1520}}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:4px 9px;font-size:13px}
+.reqlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.reqlist button{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:9px;padding:10px 10px}
+.reqlist button:hover{background:var(--sunk)}
+.reqlist button[aria-current="true"]{background:var(--blue-soft);border-color:var(--blue)}
+.rtitle{font-weight:500;display:block}
+.rmeta{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:3px}
+.badge{font-size:11.5px;font-weight:500;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.b-draft{background:var(--draft-soft);color:var(--draft)}
+.b-needs{background:var(--warn-soft);color:var(--warn)}
+.b-ready{background:var(--pass-soft);color:var(--pass)}
+.b-pass{background:var(--blue-soft);color:var(--blue)}
+.footlinks{margin-top:auto;display:flex;gap:12px;flex-wrap:wrap;font-size:13px}
+.linkbtn{background:none;border:0;padding:0;color:var(--blue);text-decoration:underline;text-underline-offset:2px}
+main{padding:26px 30px 60px;min-width:0}
+@media (max-width:600px){main{padding:20px 16px 60px}}
+.empty{max-width:520px;margin:80px auto;text-align:center;color:var(--muted)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.head h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-0.01em}
+.customer{font-size:13.5px;color:var(--muted);margin-top:4px}
+.scorebox{display:flex;align-items:center;gap:14px}
+.score{font-size:40px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.scoremeta{font-size:12.5px;color:var(--muted)}
+.bar{height:6px;background:var(--sunk);border-radius:99px;width:150px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:99px;transition:width .4s ease}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h3{margin:0 0 12px;font-size:15px;font-weight:600}
+label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin:12px 0 4px}
+label:first-of-type{margin-top:0}
+input[type=text],input[type=number],select.field,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface)}
+textarea{resize:vertical;font-family:"IBM Plex Serif",Georgia,serif;font-size:15px;line-height:1.6}
+.row3{display:grid;grid-template-columns:1fr 1.4fr .8fr;gap:10px}
+@media (max-width:600px){.row3{grid-template-columns:1fr}}
+.hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.stale{font-size:12.5px;color:var(--warn)}
+.proof{font-family:"IBM Plex Serif",Georgia,serif;font-size:15.5px;line-height:1.75;background:var(--sunk);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.proof p{margin:0 0 8px}
+.proof ol{margin:6px 0 0;padding-left:22px}
+mark{background:transparent;color:inherit;text-decoration:underline wavy var(--fail);text-decoration-thickness:1.5px;text-underline-offset:4px}
+.checks{list-style:none;margin:0;padding:0}
+.checks li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);align-items:start}
+.checks li:first-child{border-top:0}
+.dot{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;margin-top:2px}
+.dot.pass{background:var(--pass-soft);color:var(--pass)}
+.dot.fail{background:var(--fail-soft);color:var(--fail)}
+.dot.ign{background:var(--draft-soft);color:var(--draft)}
+.cname{font-weight:500}
+.cwhy{font-size:13.5px;color:var(--muted)}
+.creason{font-size:13px;color:var(--draft);font-style:italic}
+.questions{font-size:14px;margin:10px 0 0;padding:12px 14px;background:var(--warn-soft);border-radius:10px}
+.questions b{color:var(--warn)}
+.ai{margin-top:16px}
+.sugg{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px}
+.sugg h4{margin:0 0 6px;font-size:13.5px;font-weight:600}
+.sugg .txt{font-family:"IBM Plex Serif",Georgia,serif;font-size:14.5px;white-space:pre-wrap}
+.still{font-size:12.5px;color:var(--fail);margin-top:6px}
+.clean{font-size:12.5px;color:var(--pass);margin-top:6px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);max-width:560px;width:calc(100% - 32px);padding:20px}
+dialog::backdrop{background:rgba(10,14,22,.45)}
+dialog h3{margin:0 0 10px}
+dialog ul{padding-left:20px}
+.ignoreform{margin-top:8px}
+.ignoreform label{margin-top:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <h1>Spec Check</h1>
+      <p>Catch the gaps in a requirement before it goes to engineering.</p>
+    </div>
+    <section class="insights" aria-label="Insights">
+      <h2>Across all requirements</h2>
+      <div class="counts" id="counts"></div>
+      <div class="avg"><span>Average clarity</span><b id="avg">–</b></div>
+      <ul class="gaps" id="gaps"></ul>
+    </section>
+    <div class="listtools">
+      <select id="filter" aria-label="Filter by module">
+        <option value="">All modules</option>
+        <option>Dues</option><option>Events</option><option>Relationships</option>
+      </select>
+      <button class="btn primary" id="newBtn">New requirement</button>
+    </div>
+    <ul class="reqlist" id="list"></ul>
+    <div class="footlinks">
+      <button class="linkbtn" id="rulesBtn">How the checks work</button>
+      <button class="linkbtn" id="resetBtn">Reset sample data</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+<dialog id="resetDlg"><h3>Reset sample data?</h3><p>This replaces every requirement with the three samples.</p><div class="actions"><button class="btn primary" id="resetYes">Reset</button><button class="btn" id="resetNo">Cancel</button></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="rulesDlg">
+  <h3>How the checks work</h3>
+  <p>Every requirement gets 7 base checks plus 1 rule for its module. Words are matched as whole words, and singular and plural count as the same.</p>
+  <ul>
+    <li><b>Vague words:</b> words like quickly, easily, should, may, as needed, etc. or TBD. “May” as a month, as in May 1, is not flagged.</li>
+    <li><b>Missing numbers:</b> a timing word like before, after, within or soon with no number or month within six words of it.</li>
+    <li><b>Has acceptance criteria:</b> at least one criterion.</li>
+    <li><b>Expected results:</b> every criterion says what happens, using “then”.</li>
+    <li><b>Negative path:</b> at least one criterion covers something going wrong.</li>
+    <li><b>Clear actor:</b> names who is involved, such as a member, staff or the association.</li>
+    <li><b>Size:</b> the description is 120 words or fewer.</li>
+  </ul>
+  <p><b>Module rules</b></p>
+  <ul>
+    <li><b>Dues:</b> a criterion covers a failed payment, a refund or a declined card.</li>
+    <li><b>Events:</b> the requirement states a deadline or a capacity.</li>
+    <li><b>Relationships:</b> the requirement mentions a term, position or role.</li>
+  </ul>
+  <p>A requirement can only be marked ready for engineering when every check passes. A flag can be ignored with a reason, and the reason travels with the hand-off.</p>
+  <div class="actions"><button class="btn" id="rulesClose">Close</button></div>
+</dialog>
+
+<script id="engine">
+/* ---------- Rule engine (pure functions) ---------- */
+var VAGUE = ["quickly","fast","easily","easy","simple","user-friendly","intuitive","flexible","efficient","appropriate","should","may","might","as needed","if possible","etc","tbd","asap"];
+var TIMING = ["before","after","soon","regularly","within"];
+var NUMWORDS = ["one","two","three","four","five","six","seven","eight","nine","ten","twelve","fifteen","twenty","thirty","sixty","ninety","hundred"];
+var MONTHS = ["january","february","march","april","june","july","august","september","october","november","december"];
+var NEG = ["not","no","fail","failed","invalid","duplicate","already","bounce","bounced","error"];
+var ACTORS = ["member","staff","admin","user","association"];
+var MODULE_RULES = {
+  Dues:{name:"Module rule: Dues", words:["failed","fail","refund","declined"], scope:"criteria", why:"Dues requirements need a criterion for a failed payment, refund or declined card."},
+  Events:{name:"Module rule: Events", words:["deadline","capacity"], scope:"all", why:"Events requirements need a deadline or a capacity."},
+  Relationships:{name:"Module rule: Relationships", words:["term","position","role"], scope:"all", why:"Relationships requirements need a term, position or role."}
+};
+function stem(w){ w=w.toLowerCase(); if(w.length>3 && /ss$/.test(w)===false && /s$/.test(w)) return w.slice(0,-1); return w; }
+function tokens(text){ return (String(text||"").toLowerCase().match(/[a-z][a-z\-']*/g)||[]).map(function(t){return stem(t.replace(/'s$/,""));}); }
+function hasTerm(text, term){
+  if(term.indexOf(" ")>-1 || term.indexOf("-")>-1){
+    var re=new RegExp("(^|[^a-z])"+term.replace(/[-]/g,"\\-")+"([^a-z]|$)","i"); return re.test(text||"");
+  }
+  return tokens(text).indexOf(stem(term))>-1;
+}
+function found(text, list){ return list.filter(function(t){ return t==="may" ? mayIsVague(text) : hasTerm(text,t); }); }
+function rawWords(text){ return String(text||"").match(/[A-Za-z0-9][A-Za-z0-9\-']*/g)||[]; }
+function isNum(w){ return /\d/.test(w) || NUMWORDS.indexOf(String(w).toLowerCase())>-1; }
+/* "May" counts as vague only when it is not a date, such as "May 1" or "1 May" */
+function mayIsVague(text){ var w=rawWords(text); for(var i=0;i<w.length;i++){ if(w[i].toLowerCase()==="may"){ var dateLike=(w[i+1]&&/^\d/.test(w[i+1]))||(w[i-1]&&/^\d/.test(w[i-1])); if(!dateLike) return true; } } return false; }
+/* A timing word needs a number within 6 words of it, in the same sentence */
+function timingWithoutNumber(text){
+  var bad=[]; String(text||"").split(/\n|[.!?;]\s+/).forEach(function(line){ var w=rawWords(line);
+    w.forEach(function(x,i){ var s=stem(x); if(TIMING.indexOf(s)>-1||TIMING.indexOf(x.toLowerCase())>-1){ var ok=false;
+      for(var j=Math.max(0,i-6);j<=Math.min(w.length-1,i+6);j++){ if(j!==i&&(isNum(w[j])||MONTHS.indexOf(w[j].toLowerCase())>-1)) ok=true; }
+      if(!ok&&bad.indexOf(x.toLowerCase())<0) bad.push(x.toLowerCase()); } }); });
+  return bad; }
+function critLines(r){ return (r.criteria||[]).map(function(s){return String(s).trim();}).filter(Boolean); }
+function runChecks(r){
+  var crit=critLines(r), all=(r.description||"")+"\n"+crit.join("\n"), out=[];
+  var v=found(all,VAGUE);
+  out.push({id:"vague",name:"Vague words",pass:v.length===0,why:v.length?"Found: "+v.join(", ")+". Replace with something measurable.":"No vague words.",words:v});
+  var t=timingWithoutNumber(all);
+  out.push({id:"numbers",name:"Missing numbers",pass:t.length===0,why:t.length?"“"+t.join("”, “")+"” has no number near it. How many days, hours or items?":"Timing is specific."});
+  out.push({id:"criteria",name:"Has acceptance criteria",pass:crit.length>0,why:crit.length?crit.length+" criteria.":"Add at least one acceptance criterion."});
+  var noThen=crit.map(function(c,i){return hasTerm(c,"then")?null:i+1;}).filter(function(x){return x!==null;});
+  out.push({id:"then",name:"Expected results",pass:crit.length>0&&noThen.length===0,why:!crit.length?"No criteria to check.":noThen.length?"Criterion "+noThen.join(", ")+" has no expected result. Use Given, When, Then.":"Every criterion says what should happen."});
+  var negOk=crit.some(function(c){return found(c,NEG).length>0;});
+  out.push({id:"negative",name:"Negative path",pass:negOk,why:negOk?"Covers a case where something goes wrong.":"No criterion covers what happens when something goes wrong, such as a duplicate, a failure or an error."});
+  var a=found(all,ACTORS);
+  out.push({id:"actor",name:"Clear actor",pass:a.length>0,why:a.length?"Names who is involved.":"Say who does this or receives it: a member, staff, an admin or the association."});
+  var wc=(String(r.description||"").trim().match(/\S+/g)||[]).length;
+  out.push({id:"size",name:"Size",pass:wc<=120,why:wc<=120?wc+" words.":wc+" words. This is probably two requirements. Split it."});
+  var mr=MODULE_RULES[r.module];
+  if(mr){ var src=mr.scope==="criteria"?crit.join("\n"):all; var ok=found(src,mr.words).length>0;
+    out.push({id:"module",name:mr.name,pass:ok,why:ok?"Meets the "+r.module+" rule.":mr.why}); }
+  var ign=r.ignored||{};
+  out.forEach(function(c){ if(!c.pass && ign[c.id]){ c.ignored=true; c.reason=ign[c.id]; } });
+  return out;
+}
+function statusFor(r, checks){ if(!r.checked) return "Draft"; if(failing(checks).length) return "Needs work"; return r.status==="Ready for engineering"&&!r.stale ? "Ready for engineering" : "Passes checks"; }
+function scoreOf(checks){ var p=checks.filter(function(c){return c.pass||c.ignored;}).length; return Math.round(p/checks.length*100); }
+function failing(checks){ return checks.filter(function(c){return !c.pass && !c.ignored;}); }
+if(typeof module!=="undefined") module.exports={runChecks:runChecks,scoreOf:scoreOf,failing:failing,hasTerm:hasTerm,statusFor:statusFor};
+</script>
+
+<script>
+var KEY="spec-check-v1";
+var SAMPLES=[
+ {title:"Dues renewal reminders",module:"Dues",requestedBy:"Peach State School Boards Association",members:4200,
+  description:"The system should send reminders to members quickly before their membership expires so they can renew easily.",
+  criteria:["Members get reminders."]},
+ {title:"Event registration pricing",module:"Events",requestedBy:"Lakeside County Commissioners Association",members:900,
+  description:"When the early-bird deadline passes, members registering for the annual conference see the regular price.",
+  criteria:["Given the early-bird deadline was October 1, when a member registers on October 2, then they see the regular price."]},
+ {title:"Board member term end",module:"Relationships",requestedBy:"Peach State School Boards Association",members:4200,
+  description:"When staff end a board member’s term, the person is marked inactive and keeps their history.",
+  criteria:["Given a board member’s term ends on December 31, when staff end the term, then the person is marked inactive and their history is kept.","Given staff try to end a term for someone with no term, when they click End term, then they see the message “This person has no active term.”"]}
+];
+var state={reqs:[],sel:null,ai:null};
+function uid(){return "r"+Math.random().toString(36).slice(2,9);}
+function freshSamples(){
+  return SAMPLES.map(function(s,i){
+    var r=Object.assign({id:uid(),questions:[],ignored:{},prevScore:null,checked:false,stale:false,status:"Draft",score:null},JSON.parse(JSON.stringify(s)));
+    if(i<2){ var c=runChecks(r); r.score=scoreOf(c); r.checked=true; r.status=statusFor(r,c); }
+    return r;
+  });
+}
+function load(){ try{var s=localStorage.getItem(KEY); if(s){var d=JSON.parse(s); if(d&&Array.isArray(d.reqs)){state.reqs=d.reqs; return;}}}catch(e){} state.reqs=freshSamples(); }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify({reqs:state.reqs}));}catch(e){} }
+function cur(){ return state.reqs.find(function(r){return r.id===state.sel;})||null; }
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function badge(st){var c=st==="Ready for engineering"?"b-ready":st==="Needs work"?"b-needs":st==="Passes checks"?"b-pass":"b-draft";var t=st==="Ready for engineering"?"Ready":st;return '<span class="badge '+c+'">'+esc(t)+'</span>';}
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove("on");},2200);}
+
+function renderInsights(){
+  var c={Draft:0,"Needs work":0,"Passes checks":0,"Ready for engineering":0};
+  state.reqs.forEach(function(r){c[r.status]=(c[r.status]||0)+1;});
+  document.getElementById("counts").innerHTML=
+    '<div><b>'+c.Draft+'</b><span>Draft</span></div><div><b>'+c["Needs work"]+'</b><span>Needs work</span></div><div><b>'+c["Passes checks"]+'</b><span>Passes</span></div><div><b>'+c["Ready for engineering"]+'</b><span>Ready</span></div>';
+  var checked=state.reqs.filter(function(r){return r.checked&&r.score!=null;});
+  document.getElementById("avg").textContent=checked.length?Math.round(checked.reduce(function(a,r){return a+r.score;},0)/checked.length)+"%":"–";
+  var tally={};
+  checked.forEach(function(r){ failing(runChecks(r)).forEach(function(f){ var n=f.id==="module"?"Module rule":f.name; tally[n]=(tally[n]||0)+1; }); });
+  var top=Object.keys(tally).sort(function(a,b){return tally[b]-tally[a];}).slice(0,3);
+  document.getElementById("gaps").innerHTML=top.length?top.map(function(n){return '<li><span>'+esc(n)+'</span><span>fails in '+tally[n]+' of '+checked.length+'</span></li>';}).join(""):'<li><span>No gaps right now</span><span></span></li>';
+}
+function renderList(){
+  var f=document.getElementById("filter").value;
+  var rows=state.reqs.filter(function(r){return !f||r.module===f;});
+  document.getElementById("list").innerHTML=rows.length?rows.map(function(r){
+    return '<li><button data-id="'+r.id+'" aria-current="'+(r.id===state.sel)+'"><span class="rtitle">'+esc(r.title||"Untitled")+'</span><span class="rmeta">'+badge(r.status)+'<span>'+esc(r.module||"No module")+'</span><span>'+(r.checked&&r.score!=null?r.score+"%":"Not checked")+'</span></span><span class="rmeta">'+esc(r.requestedBy||"No requester yet")+(r.members?' · '+Number(r.members).toLocaleString()+' members':'')+'</span></button></li>';
+  }).join(""):'<li class="hint">No requirements in this module yet.</li>';
+}
+function proofHTML(r, checks){
+  var v=(checks.find(function(c){return c.id==="vague";})||{}).words||[];
+  function mark(t){ var h=esc(t); v.forEach(function(w){ var re=new RegExp("(^|[^a-zA-Z])("+w.replace(/[-]/g,"\\-")+"s?)(?=[^a-zA-Z]|$)","gi"); h=h.replace(re,function(m,p1,p2,off,str){ if(w==="may"){ var aft=str.slice(off+p1.length+p2.length).match(/^\s+(\S+)/), bef=str.slice(0,off+p1.length).match(/(\S+)\s*$/); if((aft&&/^\d/.test(aft[1]))||(bef&&/^\d/.test(bef[1]))) return m; } return p1+'<mark>'+p2+'</mark>'; }); }); return h; }
+  var crit=critLines(r);
+  return '<div class="proof" aria-label="Requirement as written"><p>'+mark(r.description||"No description yet.")+'</p>'+(crit.length?'<ol>'+crit.map(function(c){return '<li>'+mark(c)+'</li>';}).join("")+'</ol>':'')+'</div>';
+}
+function renderMain(){
+  var m=document.getElementById("main"), r=cur();
+  if(!r){ m.innerHTML='<div class="empty"><h2 style="color:var(--ink);font-weight:600">Pick a requirement</h2><p>Choose one from the list, or add a new one to check it before hand-off.</p></div>'; return; }
+  var checks=runChecks(r), fails=failing(checks), sc=r.checked?r.score:null;
+  var canReady=r.checked&&!r.stale&&fails.length===0&&r.status!=="Ready for engineering";
+  m.innerHTML=
+  '<div class="head"><div><h2>'+esc(r.title||"Untitled requirement")+'</h2><div class="customer">'+esc(r.module||"No module chosen")+(r.requestedBy?' · Requested by '+esc(r.requestedBy):'')+(r.members?' · '+Number(r.members).toLocaleString()+' members affected':'')+'</div><div style="margin-top:8px">'+badge(r.status)+'</div></div>'+
+  '<div class="scorebox"><div><div class="score">'+(sc==null?"–":sc+"%")+'</div><div class="bar"><i style="width:'+(sc||0)+'%"></i></div></div><div class="scoremeta">Clarity score'+(r.prevScore!=null&&sc!=null&&r.prevScore!==sc?'<br>'+r.prevScore+'% to '+sc+'%':'')+'<br>Likely questions from engineering: <b>'+(r.checked?fails.length:"–")+'</b></div></div></div>'+
+  '<div class="grid">'+
+   '<section class="panel" aria-label="Edit requirement"><h3>Requirement</h3>'+
+    '<label for="f-title">Title</label><input type="text" id="f-title" value="'+esc(r.title)+'">'+
+    '<div class="row3" style="margin-top:12px"><div><label for="f-module">Module</label><select class="field" id="f-module">'+'<option value=""'+(!r.module?' selected':'')+'>Choose a module</option>'+["Dues","Events","Relationships"].map(function(x){return '<option'+(x===r.module?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
+    '<div><label for="f-req">Requested by</label><input type="text" id="f-req" value="'+esc(r.requestedBy)+'"></div>'+
+    '<div><label for="f-mem">Members affected</label><input type="number" min="0" id="f-mem" value="'+esc(r.members)+'"></div></div>'+
+    '<label for="f-desc">Description</label><textarea id="f-desc" rows="4">'+esc(r.description)+'</textarea>'+
+    '<label for="f-crit">Acceptance criteria</label><textarea id="f-crit" rows="5">'+esc((r.criteria||[]).join("\n"))+'</textarea><div class="hint">One per line. Given, When, Then works best.</div>'+
+    '<div class="actions"><button class="btn primary" id="runBtn">Run checks</button><button class="btn" id="aiBtn" hidden>Suggest fixes</button>'+(r.stale?'<span class="stale">Edited since the last check</span>':'')+'</div>'+
+    '<div class="ai" id="aiArea"></div>'+
+    '<div class="actions" style="border-top:1px solid var(--line);padding-top:14px;margin-top:18px" id="delArea"><button class="btn" id="delBtn">Delete requirement</button></div>'+
+   '</section>'+
+   '<section class="panel" aria-label="Check results"><h3>Checks</h3>'+proofHTML(r,checks)+
+    (r.checked?'<ul class="checks">'+checks.map(function(c){
+      var st=c.pass?"pass":c.ignored?"ign":"fail", sym=c.pass?"✓":c.ignored?"–":"✕";
+      var act=c.pass?'':c.ignored?'<button class="btn small" data-undo="'+c.id+'">Undo</button>':'<button class="btn small" data-ignore="'+c.id+'" aria-expanded="false">Ignore</button>';
+      return '<li><span class="dot '+st+'" aria-hidden="true">'+sym+'</span><div><div class="cname">'+esc(c.name)+'<span class="sr"> '+(c.pass?"passed":c.ignored?"ignored":"failed")+'</span></div><div class="cwhy">'+esc(c.why)+'</div>'+(c.ignored?'<div class="creason">Ignored: '+esc(c.reason)+'</div>':'')+(!c.pass&&!c.ignored?'<form class="ignoreform" data-form="'+c.id+'" hidden><label for="why-'+c.id+'">Why is this flag fine here?</label><input type="text" id="why-'+c.id+'" maxlength="140" placeholder="For example: May is the month, not a maybe"><div class="actions" style="margin-top:8px"><button class="btn small primary" type="submit">Save reason</button><button class="btn small" type="button" data-cancel="'+c.id+'">Cancel</button></div></form>':'')+'</div>'+act+'</li>';
+    }).join("")+'</ul>':'<p class="hint">Run checks to see what engineering and QA are likely to ask about.</p>')+
+    ((r.questions||[]).length?'<div class="questions"><b>Open questions for the product owner</b><ol style="margin:6px 0 0;padding-left:20px">'+r.questions.map(function(q){return '<li>'+esc(q)+'</li>';}).join("")+'</ol></div>':'')+
+    '<div class="actions"><button class="btn primary" id="readyBtn"'+(canReady?'':' disabled')+'>Mark ready for engineering</button><button class="btn" id="copyBtn">Copy for Azure DevOps</button></div>'+
+    (!canReady&&r.status!=="Ready for engineering"?'<div class="hint">'+(!r.checked?'Run checks first.':r.stale?'Run checks again after editing.':'Still failing: '+fails.map(function(f){return f.name;}).join(", ")+'.')+'</div>':'')+
+   '</section>'+
+  '</div>';
+  bindMain();
+  initAI();
+}
+function readForm(r){
+  r.title=document.getElementById("f-title").value.trim();
+  r.module=document.getElementById("f-module").value;
+  r.requestedBy=document.getElementById("f-req").value.trim();
+  var mv=document.getElementById("f-mem").value; r.members=mv===""?null:Math.max(0,parseInt(mv,10)||0);
+  r.description=document.getElementById("f-desc").value;
+  r.criteria=document.getElementById("f-crit").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+}
+function markEdited(){ var r=cur(); if(!r) return; readForm(r); if(r.checked){ r.stale=true; if(r.status==="Ready for engineering"||r.status==="Passes checks") r.status="Needs work"; } save(); renderList(); renderInsights(); var hb=document.querySelector(".head .badge"); if(hb) hb.outerHTML=badge(r.status); var h=document.querySelector(".actions .stale"); if(!h&&r.checked){ var a=document.getElementById("runBtn").parentNode; var s=document.createElement("span"); s.className="stale"; s.textContent="Edited since the last check"; a.appendChild(s);} var rb=document.getElementById("readyBtn"); if(rb) rb.disabled=true; }
+function doCheck(){
+  var r=cur(); readForm(r);
+  if(!r.title){ toast("Add a title before running checks."); document.getElementById("f-title").focus(); return; }
+  if(!r.description.trim()){ toast("Add a description before running checks."); document.getElementById("f-desc").focus(); return; }
+  var c=runChecks(r); r.prevScore=r.checked?r.score:null; r.score=scoreOf(c); r.checked=true; r.stale=false;
+  r.status=statusFor(r,c);
+  save(); renderAll(); toast("Checks complete: "+r.score+"%");
+}
+function bindMain(){
+  ["f-title","f-module","f-req","f-mem","f-desc","f-crit"].forEach(function(id){ var el=document.getElementById(id); el.addEventListener(el.tagName==="SELECT"?"change":"input",markEdited); });
+  document.getElementById("runBtn").onclick=doCheck;
+  document.getElementById("readyBtn").onclick=function(){ var r=cur(); r.status="Ready for engineering"; save(); renderAll(); toast("Marked ready for engineering"); };
+  document.getElementById("copyBtn").onclick=copyHandoff;
+  document.getElementById("delBtn").onclick=function(){ var r=cur(); var a=document.getElementById("delArea");
+    a.innerHTML='<span>Delete “'+esc(r.title||"Untitled")+'”? This can’t be undone.</span><button class="btn small" id="delYes" style="border-color:var(--fail);color:var(--fail)">Delete</button><button class="btn small" id="delNo">Keep it</button>';
+    document.getElementById("delNo").onclick=renderMain; document.getElementById("delNo").focus();
+    document.getElementById("delYes").onclick=function(){ state.reqs=state.reqs.filter(function(x){return x.id!==r.id;}); state.sel=state.reqs[0]?state.reqs[0].id:null; save(); renderAll(); toast("Requirement deleted"); }; };
+  document.querySelectorAll("[data-ignore]").forEach(function(b){ b.onclick=function(){ var f=document.querySelector('[data-form="'+b.dataset.ignore+'"]'); f.hidden=false; b.setAttribute("aria-expanded","true"); f.querySelector("input").focus(); }; });
+  document.querySelectorAll("[data-cancel]").forEach(function(b){ b.onclick=function(){ var f=document.querySelector('[data-form="'+b.dataset.cancel+'"]'); f.hidden=true; }; });
+  document.querySelectorAll("form.ignoreform").forEach(function(f){ f.onsubmit=function(e){ e.preventDefault(); var v=f.querySelector("input").value.trim(); if(!v){ f.querySelector("input").focus(); toast("Add a short reason to ignore this flag."); return; } var r=cur(); r.ignored=r.ignored||{}; r.ignored[f.dataset.form]=v; var c=runChecks(r); r.score=scoreOf(c); r.status=statusFor(r,c); save(); renderAll(); toast("Flag ignored"); }; });
+  document.querySelectorAll("[data-undo]").forEach(function(b){ b.onclick=function(){ var r=cur(); delete r.ignored[b.dataset.undo]; var c=runChecks(r); r.score=scoreOf(c); r.status=statusFor(r,c); save(); renderAll(); }; });
+}
+function handoffText(r){
+  var checks=runChecks(r), ign=checks.filter(function(c){return c.ignored;});
+  var crit=critLines(r);
+  return "Title: "+(r.title||"Untitled")+"\n"+
+    "Description: "+(r.description||"").trim()+"\n"+
+    "Module: "+(r.module||"Not set")+" | Requested by: "+(r.requestedBy||"Not set")+" | Members affected: "+(r.members!=null?r.members:"Not set")+"\n"+
+    "Acceptance Criteria:\n"+(crit.length?crit.map(function(c,i){return (i+1)+". "+c;}).join("\n"):"None")+"\n"+
+    "Open questions: "+((r.questions||[]).length?"\n"+r.questions.map(function(q,i){return (i+1)+". "+q;}).join("\n"):"None")+"\n"+
+    "Ignored flags: "+(ign.length?ign.map(function(c){return c.name+" ("+c.reason+")";}).join("; "):"None")+"\n"+
+    "Clarity score: "+(r.checked?r.score+"%":"Not checked")+" | Status: "+r.status;
+}
+function copyHandoff(){
+  var r=cur(); var txt=handoffText(r);
+  function fallback(){ var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); toast("Copied for Azure DevOps");}catch(e){toast("Copy didn’t work. Select the text manually.");} document.body.removeChild(ta); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast("Copied for Azure DevOps");},fallback); } else fallback();
+}
+
+/* ---------- AI suggestions (only where an AI connection is available) ---------- */
+var aiFn=null;
+(function(){ try{ if(window.claude&&window.claude.use){ window.claude.use("sample").then(function(s){ aiFn=s; initAI(); }).catch(function(){}); } }catch(e){} })();
+function initAI(){
+  var b=document.getElementById("aiBtn"); if(!b) return;
+  if(!aiFn){ b.hidden=true; return; }
+  b.hidden=false; b.onclick=suggest;
+  if(state.ai&&state.ai.id===state.sel) renderSuggestions();
+}
+function suggest(){
+  var r=cur(); readForm(r); var fails=failing(runChecks(r));
+  var area=document.getElementById("aiArea"); area.innerHTML='<p class="hint">Asking for suggestions…</p>';
+  var prompt="You help business analysts tighten software requirements for an association management platform. Return JSON only, with keys rewritten_description (string), rewritten_criteria (array of strings, each in Given / When / Then form, including at least one case where something goes wrong), and questions_for_product_owner (array of strings). Keep the original intent. Do not invent features.\n\nModule: "+r.module+"\nTitle: "+r.title+"\nDescription: "+r.description+"\nCriteria:\n"+r.criteria.join("\n")+"\nFailing checks: "+(fails.map(function(f){return f.name+" ("+f.why+")";}).join("; ")||"none");
+  aiFn.json(prompt).then(function(res){
+    if(!res||typeof res.rewritten_description!=="string"||!Array.isArray(res.rewritten_criteria)) throw new Error("shape");
+    state.ai={id:r.id,desc:res.rewritten_description,crit:res.rewritten_criteria.map(String),qs:(res.questions_for_product_owner||[]).map(String)};
+    renderSuggestions();
+  }).catch(function(){ area.innerHTML='<p class="hint">Suggestions are unavailable right now. The checks still work.</p>'; });
+}
+function renderSuggestions(){
+  var r=cur(), a=state.ai, area=document.getElementById("aiArea"); if(!a||!r||a.id!==r.id){area.innerHTML="";return;}
+  var trial=Object.assign({},r,{description:a.desc!=null?a.desc:r.description,criteria:a.crit!=null?a.crit:r.criteria});
+  var still=failing(runChecks(trial)).map(function(f){return f.name;});
+  var verdict=still.length?'<div class="still">Still fails if accepted: '+esc(still.join(", "))+'</div>':'<div class="clean">Passes every check if accepted.</div>';
+  var h='<h3 style="margin:0 0 4px;font-size:14px">Suggested fixes</h3><p class="hint">Each suggestion is run through the same checks before you accept it.</p>';
+  if(a.desc!=null) h+='<div class="sugg"><h4>Description</h4><div class="txt">'+esc(a.desc)+'</div><div class="actions"><button class="btn small primary" data-acc="desc">Accept</button><button class="btn small" data-edit="desc">Edit</button><button class="btn small" data-rej="desc">Reject</button></div></div>';
+  if(a.crit!=null) h+='<div class="sugg"><h4>Acceptance criteria</h4><div class="txt">'+esc(a.crit.map(function(c,i){return (i+1)+". "+c;}).join("\n"))+'</div><div class="actions"><button class="btn small primary" data-acc="crit">Accept</button><button class="btn small" data-edit="crit">Edit</button><button class="btn small" data-rej="crit">Reject</button></div></div>';
+  if(a.qs&&a.qs.length) h+='<div class="sugg"><h4>Questions for the product owner</h4><div class="txt">'+esc(a.qs.map(function(q,i){return (i+1)+". "+q;}).join("\n"))+'</div><div class="actions"><button class="btn small primary" data-acc="qs">Add to open questions</button><button class="btn small" data-rej="qs">Dismiss</button></div></div>';
+  h+=verdict;
+  area.innerHTML=h;
+  area.querySelectorAll("[data-acc]").forEach(function(b){ b.onclick=function(){ var k=b.dataset.acc;
+    if(k==="desc"){ r.description=a.desc; a.desc=null; } else if(k==="crit"){ r.criteria=a.crit.slice(); a.crit=null; } else { r.questions=(r.questions||[]).concat(a.qs); a.qs=[]; }
+    if(a.desc==null&&a.crit==null&&!(a.qs&&a.qs.length)) state.ai=null;
+    save(); renderMain(); doCheck(); }; });
+  area.querySelectorAll("[data-rej]").forEach(function(b){ b.onclick=function(){ var k=b.dataset.rej; if(k==="desc") a.desc=null; else if(k==="crit") a.crit=null; else a.qs=[]; if(a.desc==null&&a.crit==null&&!(a.qs&&a.qs.length)) state.ai=null; renderSuggestions(); }; });
+  area.querySelectorAll("[data-edit]").forEach(function(b){ b.onclick=function(){ var k=b.dataset.edit;
+    if(k==="desc"){ document.getElementById("f-desc").value=a.desc; a.desc=null; } else { document.getElementById("f-crit").value=a.crit.join("\n"); a.crit=null; }
+    if(a.desc==null&&a.crit==null&&!(a.qs&&a.qs.length)) state.ai=null; markEdited(); renderSuggestions(); toast("Edit the text, then run checks"); }; });
+}
+
+/* ---------- App wiring ---------- */
+function renderAll(){ renderInsights(); renderList(); renderMain(); }
+document.getElementById("list").addEventListener("click",function(e){ var b=e.target.closest("button[data-id]"); if(!b) return; state.sel=b.dataset.id; renderList(); renderMain(); });
+document.getElementById("filter").onchange=renderList;
+document.getElementById("newBtn").onclick=function(){ var r={id:uid(),title:"",module:document.getElementById("filter").value||"",requestedBy:"",members:null,description:"",criteria:[],questions:[],ignored:{},status:"Draft",score:null,prevScore:null,checked:false,stale:false}; state.reqs.unshift(r); state.sel=r.id; save(); renderAll(); document.getElementById("f-title").focus(); };
+document.getElementById("rulesBtn").onclick=function(){ document.getElementById("rulesDlg").showModal(); };
+document.getElementById("rulesClose").onclick=function(){ document.getElementById("rulesDlg").close(); };
+document.getElementById("resetBtn").onclick=function(){ document.getElementById("resetDlg").showModal(); };
+document.getElementById("resetNo").onclick=function(){ document.getElementById("resetDlg").close(); };
+document.getElementById("resetYes").onclick=function(){ document.getElementById("resetDlg").close(); state.reqs=freshSamples(); state.sel=state.reqs[0].id; state.ai=null; save(); renderAll(); toast("Sample data restored"); };
+load(); state.sel=state.reqs[0]?state.reqs[0].id:null; renderAll();
+</script>
+</body>
+</html>
